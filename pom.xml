@@ -54,7 +54,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.6.0</version>
+            <version>42.7.7</version>
         </dependency>
 
         <!-- HikariCP Connection Pool -->
@@ -117,8 +117,6 @@
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
             </plugin>
-
-
 
             <!-- Maven Surefire Plugin for Testing -->
             <plugin>
