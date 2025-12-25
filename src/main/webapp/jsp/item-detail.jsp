@@ -150,6 +150,107 @@
         }
         .contact-section h3 {
             color: #1976d2;
+            margin-bottom: 10px;
+        }
+        .claim-button {
+            padding: 15px 40px;
+            background: #2ed573;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(46, 213, 115, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+        .claim-button:hover {
+            background: #26de81;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(46, 213, 115, 0.4);
+        }
+        .return-button {
+            padding: 15px 40px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+        .return-button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+        }
+        .action-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .action-info {
+            color: #666;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #f5c6cb;
+        }
+        .alert-warning {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .alert-warning p {
+            color: #856404;
+            font-weight: bold;
+        }
+        .alert-info {
+            background: #d1ecf1;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .alert-info h3 {
+            color: #0c5460;
+            margin-bottom: 10px;
+        }
+        .alert-info p {
+            color: #0c5460;
+        }
+        .alert-returned {
+            background: #d4edda;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .alert-returned h3 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+        .alert-returned p {
+            color: #155724;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -170,6 +271,11 @@
             Item item = (Item) request.getAttribute("item");
             if (item != null) {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm");
+
+                // Get current user info
+                HttpSession userSession = request.getSession(false);
+                Integer currentUserId = userSession != null ? (Integer) userSession.getAttribute("userId") : null;
+                boolean isOwner = currentUserId != null && currentUserId == item.getUserId();
         %>
             <div class="item-detail">
                 <div class="item-header">
@@ -212,19 +318,91 @@
                         </div>
                     </div>
 
+                    <!-- STATUS: OPEN -->
                     <% if ("OPEN".equals(item.getStatus())) { %>
                         <div class="contact-section">
                             <h3>📞 Contact Information</h3>
-                            <p>If this is your item or you have information about it, please contact:</p>
+                            <p>If this is your item or you have information about it:</p>
                             <p style="font-size: 1.2em; font-weight: bold; margin-top: 10px; color: #1976d2;">
                                 <%= item.getContactInfo() %>
                             </p>
                         </div>
-                    <% } else { %>
-                        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 20px;">
-                            <p style="color: #856404;">
-                                <strong>Note:</strong> This item is currently marked as <%= item.getStatus() %> and may no longer be available.
+
+                        <% if (currentUserId != null && !isOwner) { %>
+                            <!-- CLAIM BUTTON for other users -->
+                            <div class="action-section">
+                                <form method="POST" action="<%= request.getContextPath() %>/claim"
+                                      onsubmit="return confirm('Claim this item? The owner will be notified via email with your contact information.');">
+                                    <input type="hidden" name="itemId" value="<%= item.getId() %>">
+                                    <button type="submit" class="claim-button">
+                                        ✅ I Found This Item!
+                                    </button>
+                                </form>
+                                <p class="action-info">
+                                    Owner will receive an email notification with your contact info
+                                </p>
+                            </div>
+                        <% } %>
+
+                        <% if (isOwner) { %>
+                            <!-- MESSAGE for owner -->
+                            <div class="alert-warning">
+                                <p>📌 This is your item. Waiting for someone to claim it...</p>
+                                <p style="margin-top: 10px; font-weight: normal;">You'll receive an email when someone claims this item.</p>
+                            </div>
+                        <% } %>
+
+                    <!-- STATUS: CLAIMED -->
+                    <% } else if ("CLAIMED".equals(item.getStatus())) { %>
+                        <div class="alert-info">
+                            <h3>⏳ Item Claimed</h3>
+                            <p>This item has been claimed. The owner and claimer are coordinating the return.</p>
+                        </div>
+
+                        <% if (isOwner) { %>
+                            <!-- MARK AS RETURNED button for owner -->
+                            <div class="action-section">
+                                <p style="margin-bottom: 15px; color: #667eea; font-weight: bold;">
+                                    Did you receive your item back?
+                                </p>
+                                <form method="POST" action="<%= request.getContextPath() %>/mark-returned"
+                                      onsubmit="return confirm('Confirm that you received your item? This will close the listing.');">
+                                    <input type="hidden" name="itemId" value="<%= item.getId() %>">
+                                    <button type="submit" class="return-button">
+                                        🎉 I Got My Item Back!
+                                    </button>
+                                </form>
+                                <p class="action-info">
+                                    Click this once you've successfully received your item
+                                </p>
+                            </div>
+                        <% } else { %>
+                            <div class="alert-warning">
+                                <p>This item is being returned to its owner.</p>
+                            </div>
+                        <% } %>
+
+                    <!-- STATUS: RETURNED -->
+                    <% } else if ("RETURNED".equals(item.getStatus())) { %>
+                        <div class="alert-returned">
+                            <h3>✅ Item Successfully Returned</h3>
+                            <p>This item has been successfully returned to its owner! 🎉</p>
+                            <p style="margin-top: 10px; font-weight: normal;">
+                                Thank you for using Campus Lost & Found!
                             </p>
+                        </div>
+                    <% } %>
+
+                    <!-- SUCCESS/ERROR MESSAGES -->
+                    <% if (request.getAttribute("success") != null) { %>
+                        <div class="alert-success">
+                            <%= request.getAttribute("success") %>
+                        </div>
+                    <% } %>
+
+                    <% if (request.getAttribute("error") != null) { %>
+                        <div class="alert-error">
+                            <%= request.getAttribute("error") %>
                         </div>
                     <% } %>
                 </div>
