@@ -14,11 +14,12 @@ public class Item {
     private LocalDateTime claimedDate;
     private String contactInfo;
     private String category;
+    private String imagePath;
 
     public Item() {}
 
     public Item(int userId, String itemName, String description, String itemType,
-                String location, String contactInfo, String category) {
+                String location, String contactInfo, String category, String imagePath) {
         this.userId = userId;
         this.itemName = itemName;
         this.description = description;
@@ -27,6 +28,8 @@ public class Item {
         this.contactInfo = contactInfo;
         this.category = category;
         this.status = "OPEN";
+        this.imagePath = imagePath;
+
     }
 
     // Getters and Setters
@@ -62,4 +65,7 @@ public class Item {
 
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
+
+    public String getImagePath() { return imagePath; }
+    public void setImagePath(String imagePath) { this.imagePath = imagePath; }
 }

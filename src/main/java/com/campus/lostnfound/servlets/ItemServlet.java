@@ -3,17 +3,33 @@ package com.campus.lostnfound.servlets;
 import com.campus.lostnfound.dao.ItemDAO;
 import com.campus.lostnfound.models.Item;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.UUID;
 
 @WebServlet("/item")
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024 * 2,  // 2MB
+        maxFileSize = 1024 * 1024 * 10,       // 10MB
+        maxRequestSize = 1024 * 1024 * 50     // 50MB
+)
 public class ItemServlet extends HttpServlet {
     private ItemDAO itemDAO = new ItemDAO();
+
+    // Upload directory
+    private static final String UPLOAD_DIR = "uploads/items";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -142,15 +158,57 @@ public class ItemServlet extends HttpServlet {
             return;
         }
 
-        Item item = new Item(userId, itemName, description, itemType, location, contactInfo, category);
+        // Handle image upload
+        String imagePath = null;
+        try {
+            Part filePart = request.getPart("itemImage");
+
+            if (filePart != null && filePart.getSize() > 0) {
+                String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+
+                // Validate file extension
+                String fileExtension = "";
+                int lastDotIndex = fileName.lastIndexOf(".");
+                if (lastDotIndex > 0) {
+                    fileExtension = fileName.substring(lastDotIndex).toLowerCase();
+                }
+
+                if (!fileExtension.matches("\\.(jpg|jpeg|png|gif)")) {
+                    request.setAttribute("error", "Only JPG, PNG, and GIF images are allowed");
+                    request.getRequestDispatcher("/jsp/post-item.jsp").forward(request, response);
+                    return;
+                }
+
+                // Generate unique filename
+                String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
+
+                // Get upload directory path
+                String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
+                File uploadDir = new File(uploadPath);
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
+
+                // Save file
+                Path filePath = Paths.get(uploadPath, uniqueFileName);
+                Files.copy(filePart.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+                // Store relative path for database
+                imagePath = UPLOAD_DIR + "/" + uniqueFileName;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Continue without image if upload fails
+        }
+
+        // Create item with image path
+        Item item = new Item(userId, itemName, description, itemType, location, contactInfo, category, imagePath);
 
         if (itemDAO.addItem(item)) {
-            request.setAttribute("success", "Item posted successfully!");
-            response.sendRedirect(request.getContextPath() + "/item?action=list");
+            response.sendRedirect(request.getContextPath() + "/home?action=my-items");
         } else {
             request.setAttribute("error", "Failed to post item. Try again.");
             request.getRequestDispatcher("/jsp/post-item.jsp").forward(request, response);
         }
     }
 }
-

@@ -5,153 +5,73 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="icon" type="image/png" href="<%= request.getContextPath() %>/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Items - Campus Lost & Found</title>
     <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --lost: #ff4757;
+            --found: #2ed573;
+            --bg: #f8f9fa;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #333; }
+
         header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white; padding: 1rem 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: sticky; top: 0; z-index: 100;
         }
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .navbar h1 { font-size: 1.8em; }
-        .nav-links {
-            display: flex;
-            gap: 20px;
-        }
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: background 0.3s;
-        }
-        .nav-links a:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        .container {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-        .page-header {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-        }
-        .page-header h2 {
-            color: #667eea;
-        }
-        .items-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
+        .navbar { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
+        .nav-links { display: flex; gap: 15px; }
+        .nav-links a { color: white; text-decoration: none; padding: 8px 15px; border-radius: 20px; transition: 0.3s; font-size: 0.9rem; }
+        .nav-links a:hover { background: rgba(255,255,255,0.2); }
+
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+
+        .page-header { margin-bottom: 30px; }
+        .page-header h2 { color: var(--secondary); font-size: 2rem; }
+
+        .items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
+
         .item-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            transition: transform 0.2s;
+            background: white; border-radius: 15px; overflow: hidden;
+            transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column;
         }
-        .item-card:hover {
-            transform: translateY(-5px);
+        .item-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+
+        .image-container { position: relative; height: 200px; }
+        .item-img { width: 100%; height: 100%; object-fit: cover; }
+        .type-badge {
+            position: absolute; top: 15px; right: 15px;
+            padding: 5px 12px; border-radius: 20px; color: white;
+            font-size: 0.75rem; font-weight: bold; text-transform: uppercase;
         }
-        .item-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px;
+
+        .item-body { padding: 20px; flex-grow: 1; }
+        .item-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 10px; color: #2d3748; }
+        .item-meta { font-size: 0.9rem; color: #718096; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+
+        .status-pill {
+            display: inline-block; padding: 4px 10px; border-radius: 6px;
+            font-size: 0.8rem; font-weight: 600; margin-top: 10px;
         }
-        .item-header h3 {
-            margin-bottom: 5px;
+        .status-open { background: #ebf8ff; color: #3182ce; }
+        .status-claimed { background: #fffaf0; color: #dd6b20; }
+        .status-returned { background: #f0fff4; color: #38a169; }
+
+        .btn-view {
+            display: block; width: 100%; text-align: center;
+            padding: 12px; background: #edf2f7; color: #4a5568;
+            text-decoration: none; font-weight: 600; transition: 0.3s;
         }
-        .badge {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            margin-right: 5px;
-        }
-        .lost-badge {
-            background: #ff4757;
-            color: white;
-        }
-        .found-badge {
-            background: #2ed573;
-            color: white;
-        }
-        .status-badge {
-            background: #ffa502;
-            color: white;
-        }
-        .status-claimed {
-            background: #ff6348;
-        }
-        .status-returned {
-            background: #1e90ff;
-        }
-        .item-body {
-            padding: 15px;
-        }
-        .item-body p {
-            margin: 8px 0;
-            color: #666;
-            font-size: 0.95em;
-        }
-        .item-location {
-            color: #667eea;
-            font-weight: bold;
-        }
-        .btn {
-            display: inline-block;
-            padding: 8px 15px;
-            background: #667eea;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background 0.3s;
-            border: none;
-            cursor: pointer;
-            font-size: 0.9em;
-            font-weight: bold;
-            margin-right: 5px;
-            margin-top: 10px;
-        }
-        .btn:hover {
-            background: #764ba2;
-        }
-        .btn-success {
-            background: #2ed573;
-        }
-        .btn-success:hover {
-            background: #26de81;
-        }
-        .no-items {
-            text-align: center;
-            padding: 40px;
-            background: white;
-            border-radius: 10px;
-            color: #666;
-        }
-        .no-items h2 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
+        .btn-view:hover { background: var(--primary); color: white; }
+
+        .no-items { text-align: center; padding: 60px; background: white; border-radius: 20px; }
     </style>
 </head>
 <body>
@@ -160,8 +80,7 @@
             <h1>📦 My Items</h1>
             <div class="nav-links">
                 <a href="<%= request.getContextPath() %>/home">Home</a>
-                <a href="<%= request.getContextPath() %>/home?action=all-items">Browse Items</a>
-                <a href="<%= request.getContextPath() %>/item?action=new">+ Post Item</a>
+                <a href="<%= request.getContextPath() %>/item?action=new">Post New</a>
                 <a href="<%= request.getContextPath() %>/logout">Logout</a>
             </div>
         </div>
@@ -169,55 +88,46 @@
 
     <div class="container">
         <div class="page-header">
-            <h2>Items You've Posted</h2>
-            <p>Manage your lost and found items</p>
+            <h2>Your Dashboard</h2>
+            <p>Manage items you have reported</p>
         </div>
 
         <%
             List<Item> userItems = (List<Item>) request.getAttribute("userItems");
             if (userItems != null && !userItems.isEmpty()) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm");
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
         %>
             <div class="items-grid">
-                <%
-                    for (Item item : userItems) {
-                %>
+                <% for (Item item : userItems) { %>
                     <div class="item-card">
-                        <div class="item-header">
-                            <h3><%= item.getItemName() %></h3>
-                            <span class="badge <%= "LOST".equals(item.getItemType()) ? "lost-badge" : "found-badge" %>">
+                        <div class="image-container">
+                            <span class="type-badge" style="background: <%= "LOST".equals(item.getItemType()) ? "#ff4757" : "#2ed573" %>">
                                 <%= item.getItemType() %>
                             </span>
-                            <span class="badge status-badge <%= "CLAIMED".equals(item.getStatus()) ? "status-claimed" : "RETURNED".equals(item.getStatus()) ? "status-returned" : "" %>">
+                            <% if (item.getImagePath() != null && !item.getImagePath().isEmpty()) { %>
+                                <img src="<%= request.getContextPath() %>/<%= item.getImagePath() %>" class="item-img">
+                            <% } else { %>
+                                <div style="width:100%; height:100%; background:#edf2f7; display:flex; align-items:center; justify-content:center; font-size:3rem;">📦</div>
+                            <% } %>
+                        </div>
+                        <div class="item-body">
+                            <h3 class="item-title"><%= item.getItemName() %></h3>
+                            <p class="item-meta">📍 <%= item.getLocation() %></p>
+                            <p class="item-meta">📅 <%= item.getPostedDate().format(formatter) %></p>
+                            <span class="status-pill status-<%= item.getStatus().toLowerCase() %>">
                                 <%= item.getStatus() %>
                             </span>
                         </div>
-                        <div class="item-body">
-                            <p><strong>Category:</strong> <%= item.getCategory() %></p>
-                            <p class="item-location">📍 <%= item.getLocation() %></p>
-                            <p><%= item.getDescription() != null ? item.getDescription() : "No description" %></p>
-                            <p><strong>Contact:</strong> <%= item.getContactInfo() %></p>
-                            <% if (item.getPostedDate() != null) { %>
-                                <p><strong>Posted:</strong> <%= item.getPostedDate().format(formatter) %></p>
-                            <% } %>
-                            <a href="<%= request.getContextPath() %>/item?action=view&id=<%= item.getId() %>" class="btn">View Details</a>
-                        </div>
+                        <a href="<%= request.getContextPath() %>/item?action=view&id=<%= item.getId() %>" class="btn-view">Manage Details</a>
                     </div>
-                <%
-                    }
-                %>
+                <% } %>
             </div>
-        <%
-            } else {
-        %>
+        <% } else { %>
             <div class="no-items">
-                <h2>📭 No Items Yet</h2>
-                <p>You haven't posted any items. Start by reporting a lost or found item!</p>
-                <a href="<%= request.getContextPath() %>/item?action=new" class="btn btn-success">Post Your First Item</a>
+                <h2>No items found</h2>
+                <a href="<%= request.getContextPath() %>/item?action=new" class="btn-view" style="max-width:200px; margin:20px auto; border-radius:8px;">Post Item</a>
             </div>
-        <%
-            }
-        %>
+        <% } %>
     </div>
 </body>
 </html>

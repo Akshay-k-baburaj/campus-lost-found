@@ -4,254 +4,70 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="icon" type="image/png" href="<%= request.getContextPath() %>/images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Item Details - Campus Lost & Found</title>
     <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --lost: #ff4757;
+            --found: #2ed573;
+            --warning: #f6ad55;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #2d3748; padding-bottom: 50px; }
+
         header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white; padding: 1rem 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
+        .navbar { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
+        .nav-link { color: white; text-decoration: none; font-size: 0.9rem; }
+
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .detail-card {
+            background: white; border-radius: 20px; overflow: hidden;
+            display: grid; grid-template-columns: 1fr 1fr;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
         }
-        .navbar h1 { font-size: 1.8em; }
-        .nav-links {
-            display: flex;
-            gap: 20px;
+        @media (max-width: 768px) { .detail-card { grid-template-columns: 1fr; } }
+
+        .image-side { background: #f8fafc; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .image-side img { width: 100%; max-height: 500px; object-fit: contain; border-radius: 12px; }
+        .no-image { font-size: 5rem; color: #cbd5e0; }
+
+        .content-side { padding: 40px; display: flex; flex-direction: column; }
+        .badge-row { display: flex; gap: 10px; margin-bottom: 15px; }
+        .badge { padding: 4px 12px; border-radius: 20px; color: white; font-size: 0.75rem; font-weight: bold; }
+
+        h2 { font-size: 2.2rem; margin-bottom: 15px; color: #1a202c; }
+        .description { color: #4a5568; line-height: 1.6; margin-bottom: 25px; font-size: 1.05rem; }
+
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .info-item { background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #edf2f7; }
+        .info-item label { display: block; font-size: 0.7rem; font-weight: bold; color: #a0aec0; text-transform: uppercase; }
+        .info-item span { font-weight: 600; color: #2d3748; }
+
+        .action-box { border-radius: 15px; padding: 25px; text-align: center; margin-bottom: 15px; }
+        .box-open { background: #ebf8ff; border: 2px dashed #90cdf4; }
+        .box-claimed { background: #fffaf0; border: 2px dashed var(--warning); }
+
+        .btn-main {
+            display: inline-block; width: 100%; padding: 15px; border-radius: 10px;
+            font-weight: bold; font-size: 1.1rem; cursor: pointer; border: none;
+            transition: 0.3s; margin-top: 15px; text-decoration: none; color: white;
         }
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: background 0.3s;
-        }
-        .nav-links a:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        .container {
-            max-width: 900px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-        .item-detail {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-        .item-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-        }
-        .item-header h2 {
-            margin-bottom: 15px;
-        }
-        .badges {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .badge {
-            display: inline-block;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.9em;
-        }
-        .lost-badge {
-            background: #ff4757;
-            color: white;
-        }
-        .found-badge {
-            background: #2ed573;
-            color: white;
-        }
-        .status-badge {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        .item-body {
-            padding: 30px;
-        }
-        .detail-section {
-            margin-bottom: 25px;
-            padding-bottom: 25px;
-            border-bottom: 1px solid #eee;
-        }
-        .detail-section:last-child {
-            border-bottom: none;
-        }
-        .detail-section h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-        .detail-section p {
-            color: #666;
-            line-height: 1.6;
-            font-size: 1em;
-        }
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 10px;
-        }
-        .info-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-        }
-        .info-item label {
-            display: block;
-            color: #667eea;
-            font-weight: bold;
-            margin-bottom: 5px;
-            font-size: 0.9em;
-        }
-        .info-item span {
-            color: #333;
-            font-size: 1em;
-        }
-        .back-link {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .btn {
-            display: inline-block;
-            padding: 12px 25px;
-            background: #667eea;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background 0.3s;
-            font-weight: bold;
-        }
-        .btn:hover {
-            background: #764ba2;
-        }
-        .contact-section {
-            background: #e3f2fd;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-        .contact-section h3 {
-            color: #1976d2;
-            margin-bottom: 10px;
-        }
-        .claim-button {
-            padding: 15px 40px;
-            background: #2ed573;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.2em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 6px rgba(46, 213, 115, 0.3);
-            width: 100%;
-            max-width: 400px;
-        }
-        .claim-button:hover {
-            background: #26de81;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(46, 213, 115, 0.4);
-        }
-        .return-button {
-            padding: 15px 40px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
-            width: 100%;
-            max-width: 400px;
-        }
-        .return-button:hover {
-            background: #764ba2;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
-        }
-        .action-section {
-            margin-top: 20px;
-            text-align: center;
-        }
-        .action-info {
-            color: #666;
-            margin-top: 10px;
-            font-size: 0.9em;
-        }
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            border: 1px solid #c3e6cb;
-        }
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            border: 1px solid #f5c6cb;
-        }
-        .alert-warning {
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-        .alert-warning p {
-            color: #856404;
-            font-weight: bold;
-        }
-        .alert-info {
-            background: #d1ecf1;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-        .alert-info h3 {
-            color: #0c5460;
-            margin-bottom: 10px;
-        }
-        .alert-info p {
-            color: #0c5460;
-        }
-        .alert-returned {
-            background: #d4edda;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-        .alert-returned h3 {
-            color: #155724;
-            margin-bottom: 10px;
-        }
-        .alert-returned p {
-            color: #155724;
-            font-weight: bold;
-        }
+        .btn-claim { background: var(--found); }
+        .btn-return { background: var(--warning); }
+        .btn-main:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        .alert { padding: 15px; border-radius: 10px; margin-top: 20px; font-weight: 600; text-align: center; }
+        .alert-success { background: #f0fff4; color: #2f855a; border: 1px solid #c6f6d5; }
+        .alert-error { background: #fff5f5; color: #c53030; border: 1px solid #feb2b2; }
+        .btn-back { display: block; text-align: center; margin-top: 25px; color: var(--primary); font-weight: 600; text-decoration: none; }
     </style>
 </head>
 <body>
@@ -259,9 +75,7 @@
         <div class="navbar">
             <h1>📦 Item Details</h1>
             <div class="nav-links">
-                <a href="<%= request.getContextPath() %>/home">Home</a>
-                <a href="<%= request.getContextPath() %>/home?action=all-items">Browse Items</a>
-                <a href="<%= request.getContextPath() %>/logout">Logout</a>
+                <a href="<%= request.getContextPath() %>/home" class="nav-link">← Dashboard</a>
             </div>
         </div>
     </header>
@@ -270,150 +84,86 @@
         <%
             Item item = (Item) request.getAttribute("item");
             if (item != null) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' HH:mm");
-
-                // Get current user info
-                HttpSession userSession = request.getSession(false);
-                Integer currentUserId = userSession != null ? (Integer) userSession.getAttribute("userId") : null;
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
+                Integer currentUserId = (Integer) session.getAttribute("userId");
                 boolean isOwner = currentUserId != null && currentUserId == item.getUserId();
+                String status = item.getStatus();
         %>
-            <div class="item-detail">
-                <div class="item-header">
-                    <h2><%= item.getItemName() %></h2>
-                    <div class="badges">
-                        <span class="badge <%= "LOST".equals(item.getItemType()) ? "lost-badge" : "found-badge" %>">
+            <div class="detail-card">
+                <div class="image-side">
+                    <% if (item.getImagePath() != null && !item.getImagePath().isEmpty()) { %>
+                        <img src="<%= request.getContextPath() %>/<%= item.getImagePath() %>" alt="Item Image">
+                    <% } else { %>
+                        <div class="no-image">📦</div>
+                    <% } %>
+                </div>
+
+                <div class="content-side">
+                    <%-- Success/Error Messages from Servlet --%>
+                    <% if (request.getAttribute("success") != null) { %>
+                        <div class="alert alert-success"><%= request.getAttribute("success") %></div>
+                    <% } %>
+                    <% if (request.getAttribute("error") != null) { %>
+                        <div class="alert alert-error"><%= request.getAttribute("error") %></div>
+                    <% } %>
+
+                    <div class="badge-row">
+                        <span class="badge" style="background: <%= "LOST".equals(item.getItemType()) ? "var(--lost)" : "var(--found)" %>">
                             <%= item.getItemType() %>
                         </span>
-                        <span class="badge status-badge">
-                            Status: <%= item.getStatus() %>
-                        </span>
-                    </div>
-                </div>
-
-                <div class="item-body">
-                    <div class="detail-section">
-                        <h3>Description</h3>
-                        <p><%= item.getDescription() != null && !item.getDescription().isEmpty() ? item.getDescription() : "No description provided" %></p>
+                        <span class="badge" style="background: #cbd5e0; color: #4a5568;">Status: <%= status %></span>
                     </div>
 
-                    <div class="detail-section">
-                        <h3>Item Information</h3>
-                        <div class="info-grid">
-                            <div class="info-item">
-                                <label>Category</label>
-                                <span><%= item.getCategory() %></span>
-                            </div>
-                            <div class="info-item">
-                                <label>Location</label>
-                                <span>📍 <%= item.getLocation() %></span>
-                            </div>
-                            <div class="info-item">
-                                <label>Status</label>
-                                <span><%= item.getStatus() %></span>
-                            </div>
-                            <div class="info-item">
-                                <label>Posted On</label>
-                                <span><%= item.getPostedDate() != null ? item.getPostedDate().format(formatter) : "N/A" %></span>
-                            </div>
-                        </div>
+                    <h2><%= item.getItemName() %></h2>
+                    <p class="description"><%= item.getDescription() != null ? item.getDescription() : "No description provided." %></p>
+
+                    <div class="info-grid">
+                        <div class="info-item"><label>Category</label><span><%= item.getCategory() %></span></div>
+                        <div class="info-item"><label>Location</label><span>📍 <%= item.getLocation() %></span></div>
+                        <div class="info-item"><label>Posted On</label><span><%= item.getPostedDate().format(formatter) %></span></div>
+                        <div class="info-item"><label>Contact</label><span><%= item.getContactInfo() %></span></div>
                     </div>
 
-                    <!-- STATUS: OPEN -->
-                    <% if ("OPEN".equals(item.getStatus())) { %>
-                        <div class="contact-section">
-                            <h3>📞 Contact Information</h3>
-                            <p>If this is your item or you have information about it:</p>
-                            <p style="font-size: 1.2em; font-weight: bold; margin-top: 10px; color: #1976d2;">
-                                <%= item.getContactInfo() %>
-                            </p>
-                        </div>
-
-                        <% if (currentUserId != null && !isOwner) { %>
-                            <!-- CLAIM BUTTON for other users -->
-                            <div class="action-section">
-                                <form method="POST" action="<%= request.getContextPath() %>/claim"
-                                      onsubmit="return confirm('Claim this item? The owner will be notified via email with your contact information.');">
+                    <%-- Dynamic Action Box based on Status --%>
+                    <% if ("OPEN".equals(status)) { %>
+                        <div class="action-box box-open">
+                            <% if (isOwner) { %>
+                                <h3 style="color: var(--primary);">Your Listing</h3>
+                                <p>Waiting for someone to find or claim this item.</p>
+                            <% } else { %>
+                                <h3 style="color: var(--primary);">Found this?</h3>
+                                <form method="POST" action="<%= request.getContextPath() %>/claim">
                                     <input type="hidden" name="itemId" value="<%= item.getId() %>">
-                                    <button type="submit" class="claim-button">
-                                        ✅ I Found This Item!
-                                    </button>
+                                    <button type="submit" class="btn-main btn-claim">I Have This Item!</button>
                                 </form>
-                                <p class="action-info">
-                                    Owner will receive an email notification with your contact info
-                                </p>
-                            </div>
-                        <% } %>
-
-                        <% if (isOwner) { %>
-                            <!-- MESSAGE for owner -->
-                            <div class="alert-warning">
-                                <p>📌 This is your item. Waiting for someone to claim it...</p>
-                                <p style="margin-top: 10px; font-weight: normal;">You'll receive an email when someone claims this item.</p>
-                            </div>
-                        <% } %>
-
-                    <!-- STATUS: CLAIMED -->
-                    <% } else if ("CLAIMED".equals(item.getStatus())) { %>
-                        <div class="alert-info">
-                            <h3>⏳ Item Claimed</h3>
-                            <p>This item has been claimed. The owner and claimer are coordinating the return.</p>
+                            <% } %>
                         </div>
-
-                        <% if (isOwner) { %>
-                            <!-- MARK AS RETURNED button for owner -->
-                            <div class="action-section">
-                                <p style="margin-bottom: 15px; color: #667eea; font-weight: bold;">
-                                    Did you receive your item back?
-                                </p>
-                                <form method="POST" action="<%= request.getContextPath() %>/mark-returned"
-                                      onsubmit="return confirm('Confirm that you received your item? This will close the listing.');">
+                    <% } else if ("CLAIMED".equals(status)) { %>
+                        <div class="action-box box-claimed">
+                            <% if (isOwner) { %>
+                                <h3 style="color: #c05621;">Claimed!</h3>
+                                <p>Someone has reached out. Did you get your item back?</p>
+                                <form method="POST" action="<%= request.getContextPath() %>/mark-returned">
                                     <input type="hidden" name="itemId" value="<%= item.getId() %>">
-                                    <button type="submit" class="return-button">
-                                        🎉 I Got My Item Back!
-                                    </button>
+                                    <button type="submit" class="btn-main btn-return">Yes, Mark as Returned</button>
                                 </form>
-                                <p class="action-info">
-                                    Click this once you've successfully received your item
-                                </p>
-                            </div>
-                        <% } else { %>
-                            <div class="alert-warning">
-                                <p>This item is being returned to its owner.</p>
-                            </div>
-                        <% } %>
-
-                    <!-- STATUS: RETURNED -->
-                    <% } else if ("RETURNED".equals(item.getStatus())) { %>
-                        <div class="alert-returned">
-                            <h3>✅ Item Successfully Returned</h3>
-                            <p>This item has been successfully returned to its owner! 🎉</p>
-                            <p style="margin-top: 10px; font-weight: normal;">
-                                Thank you for using Campus Lost & Found!
-                            </p>
+                            <% } else { %>
+                                <h3 style="color: #c05621;">Currently Claimed</h3>
+                                <p>Another student has already reported finding this item.</p>
+                            <% } %>
+                        </div>
+                    <% } else { %>
+                        <div class="alert alert-success">
+                            ✨ This item has been successfully <%= status.toLowerCase() %>.
                         </div>
                     <% } %>
 
-                    <!-- SUCCESS/ERROR MESSAGES -->
-                    <% if (request.getAttribute("success") != null) { %>
-                        <div class="alert-success">
-                            <%= request.getAttribute("success") %>
-                        </div>
-                    <% } %>
-
-                    <% if (request.getAttribute("error") != null) { %>
-                        <div class="alert-error">
-                            <%= request.getAttribute("error") %>
-                        </div>
-                    <% } %>
+                    <a href="<%= request.getContextPath() %>/home?action=all-items" class="btn-back">← Back to Browse</a>
                 </div>
             </div>
-        <%
-            }
-        %>
-
-        <div class="back-link">
-            <a href="<%= request.getContextPath() %>/home?action=all-items" class="btn">← Back to Items</a>
-        </div>
+        <% } else { %>
+            <div class="alert alert-error">Item not found.</div>
+        <% } %>
     </div>
 </body>
 </html>

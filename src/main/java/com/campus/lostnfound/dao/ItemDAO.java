@@ -13,8 +13,8 @@ public class ItemDAO {
      * Add new item to database
      */
     public boolean addItem(Item item) {
-        String sql = "INSERT INTO items (user_id, item_name, description, item_type, location, status, contact_info, category) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO items (user_id, item_name, description, item_type, location, " +
+                "status, contact_info, category, image_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getDataSource().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -26,6 +26,7 @@ public class ItemDAO {
             stmt.setString(6, item.getStatus());
             stmt.setString(7, item.getContactInfo());
             stmt.setString(8, item.getCategory());
+            stmt.setString(9, item.getImagePath());
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -267,6 +268,7 @@ public class ItemDAO {
         item.setStatus(rs.getString("status"));
         item.setContactInfo(rs.getString("contact_info"));
         item.setCategory(rs.getString("category"));
+        item.setImagePath(rs.getString("image_path"));
 
         Timestamp postedTS = rs.getTimestamp("posted_date");
         if (postedTS != null) {
